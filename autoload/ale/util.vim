@@ -88,13 +88,15 @@ function! ale#util#GetFunction(string_or_ref) abort
 endfunction
 
 function! ale#util#Open(filename, line, column, options) abort
-    if get(a:options, 'open_in_tab', 0)
-        call ale#util#Execute('tabedit +' . a:line . ' ' . fnameescape(a:filename))
-    elseif bufnr(a:filename) isnot bufnr('')
-        " Open another file only if we need to.
-        call ale#util#Execute('edit +' . a:line . ' ' . fnameescape(a:filename))
-    else
+    let l:f = fnameescape(fnamemodify(a:filename, ':.'))
+
+    " Open another file only if we need to.
+    if bufnr(a:filename) is bufnr('')
         normal! m`
+    elseif get(a:options, 'open_in_tab', 0)
+        call ale#util#Execute('tabedit +' . a:line . ' ' . l:f)
+    else
+        call ale#util#Execute('edit +' . a:line . ' ' . l:f)
     endif
 
     call cursor(a:line, a:column)
