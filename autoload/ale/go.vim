@@ -1,27 +1,34 @@
 " Author: Horacio Sanson https://github.com/hsanson
 " Description: Functions for integrating with Go tools
 
-" Find the nearest dir listed in GOPATH and assume it the root of the go
-" project.
+" Attempt to find the root for this project.
 function! ale#go#FindProjectRoot(buffer) abort
-    let l:sep = has('win32') ? ';' : ':'
+    " Vendoring tools: good bet this is the root.
+    for l:f in ['go.mod', 'Gopkg.toml', 'glide.yaml']
+        let l:f = ale#path#FindNearestFile(a:buffer, l:f)
 
-    let l:filename = ale#path#Simplify(expand('#' . a:buffer . ':p'))
-
-    for l:name in split($GOPATH, l:sep)
-      let l:path_dir = ale#path#Simplify(l:name)
-
-      " Use the directory from GOPATH if the current filename starts with it.
-      if l:filename[: len(l:path_dir) - 1] is? l:path_dir
-          return l:path_dir
-      endif
+        if l:f isnot# ''
+            return fnamemodify(l:f, ':h')
+        endif
     endfor
 
-    let l:default_go_path = ale#path#Simplify(expand('~/go'))
+    " vendor directory or VCS dir is also reasonably safe.
+    for l:d in ['vendor', '.git', '.hg']
+        let l:d = ale#path#FindNearestDirectory(a:buffer, 'vendor')
 
-    if isdirectory(l:default_go_path)
-      return l:default_go_path
-    endif
+        if l:d isnot# ''
+            return l:d
+        endif
+    endfor
+
+    " Better than nothing, I guess?
+    for l:f in ['doc.go', 'README.md']
+        let l:f = ale#path#FindNearestFile(a:buffer, l:f)
+
+        if l:f isnot# ''
+            return fnamemodify(l:f, ':h')
+        endif
+    endfor
 
     return ''
 endfunction

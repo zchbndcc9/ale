@@ -1,14 +1,14 @@
 Before:
-  Save $GOPATH
+  "Save $GOPATH
   Save g:ale_completion_enabled
 
   let g:ale_completion_enabled = 0
   let g:sep = has('win32') ? ';' : ':'
 
   call ale#assert#SetUpLinterTest('go', 'langserver')
-  let $GOPATH = ale#path#Simplify(g:dir . '/go_paths/go1')
-  \ . g:sep
-  \ . ale#path#Simplify(g:dir . '/go_paths/go2')
+  "let $GOPATH = ale#path#Simplify(g:dir . '/go_paths/go1')
+  "\ . g:sep
+  "\ . ale#path#Simplify(g:dir . '/go_paths/go2')
 
 After:
   Restore
@@ -52,16 +52,9 @@ Execute(should ignore go-langserver -gocodecompletion option):
 
   AssertLinter 'go-langserver', ale#Escape('go-langserver') . ' -trace'
 
-Execute(should set go-langserver for go app1):
-  call ale#test#SetFilename('go_paths/go1/prj1/file.go')
+Execute(should set root project):
+  call ale#test#SetFilename('test/command_callback/go_paths/go1/prj1/file.go')
 
   AssertLSPLanguage 'go'
   AssertLSPOptions {}
-  AssertLSPProject ale#path#Simplify(g:dir . '/go_paths/go1')
-
-Execute(should set go-langserver for go app2):
-  call ale#test#SetFilename('go_paths/go2/prj1/file.go')
-
-  AssertLSPLanguage 'go'
-  AssertLSPOptions {}
-  AssertLSPProject ale#path#Simplify(g:dir . '/go_paths/go2')
+  AssertLSPProject ale#path#Simplify(g:dir . '/test/command_callback/go_paths/go1')
