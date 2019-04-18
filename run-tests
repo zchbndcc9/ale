@@ -24,6 +24,7 @@ run_neovim_02_tests=1
 run_neovim_03_tests=1
 run_vim_80_tests=1
 run_vim_81_tests=1
+run_python_tests=1
 run_linters=1
 
 while [ $# -ne 0 ]; do
@@ -39,6 +40,7 @@ while [ $# -ne 0 ]; do
     --neovim-only)
         run_vim_80_tests=0
         run_vim_81_tests=0
+        run_python_tests=0
         run_linters=0
         shift
     ;;
@@ -46,6 +48,7 @@ while [ $# -ne 0 ]; do
         run_neovim_03_tests=0
         run_vim_80_tests=0
         run_vim_81_tests=0
+        run_python_tests=0
         run_linters=0
         shift
     ;;
@@ -53,12 +56,14 @@ while [ $# -ne 0 ]; do
         run_neovim_02_tests=0
         run_vim_80_tests=0
         run_vim_81_tests=0
+        run_python_tests=0
         run_linters=0
         shift
     ;;
     --vim-only)
         run_neovim_02_tests=0
         run_neovim_03_tests=0
+        run_python_tests=0
         run_linters=0
         shift
     ;;
@@ -66,6 +71,7 @@ while [ $# -ne 0 ]; do
         run_neovim_02_tests=0
         run_neovim_03_tests=0
         run_vim_81_tests=0
+        run_python_tests=0
         run_linters=0
         shift
     ;;
@@ -73,10 +79,28 @@ while [ $# -ne 0 ]; do
         run_neovim_02_tests=0
         run_neovim_03_tests=0
         run_vim_80_tests=0
+        run_python_tests=0
         run_linters=0
         shift
     ;;
     --linters-only)
+        run_vim_80_tests=0
+        run_vim_81_tests=0
+        run_neovim_02_tests=0
+        run_neovim_03_tests=0
+        run_python_tests=0
+        shift
+    ;;
+    --python-only)
+        run_vim_80_tests=0
+        run_vim_81_tests=0
+        run_neovim_02_tests=0
+        run_neovim_03_tests=0
+        run_linters=0
+        shift
+    ;;
+    # This option is needed for Travis.
+    --python-and-linters)
         run_vim_80_tests=0
         run_vim_81_tests=0
         run_neovim_02_tests=0
@@ -98,6 +122,7 @@ while [ $# -ne 0 ]; do
         echo '  --vim-only        Run tests only for Vim 8.0 and 8.1'
         echo '  --vim-80-only     Run tests only for Vim 8.0'
         echo '  --vim-81-only     Run tests only for Vim 8.1'
+        echo '  --python-only     Run only the Python tests'
         echo '  --linters-only    Run only Vint and custom checks'
         echo '  --help            Show this help text'
         echo '  --                Stop parsing options after this'
@@ -152,6 +177,13 @@ for vim in $(docker run --rm "$DOCKER_RUN_IMAGE" ls /vim-build/bin | grep '^neov
         pid_list="$pid_list $!"
     fi
 done
+
+if ((run_python_tests)); then
+    echo "Starting Python tests..."
+    file_number=$((file_number+1))
+    test/script/run-python-tests &> "$output_dir/$file_number" 2>&1 &
+    pid_list="$pid_list $!"
+fi
 
 if ((run_linters)); then
     echo "Starting Vint..."

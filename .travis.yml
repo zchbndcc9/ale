@@ -7,6 +7,6 @@ env:
     - OPTIONS=--vim-80-only
     - OPTIONS=--vim-81-only
     - OPTIONS=--neovim-only
-    - OPTIONS=--linters-only
+    - OPTIONS=--python-and-linters
 script: |
     ./run-tests -v $OPTIONS
