@@ -1,0 +1,95 @@
+Before:
+  let g:filename = tempname()
+
+After:
+  " Close the extra buffer if we opened it.
+  if expand('%:p') is# g:filename
+    noautocmd :q!
+  endif
+
+  if filereadable(g:filename)
+    call delete(g:filename)
+  endif
+
+  unlet! g:filename
+
+Execute(Test that lines can be inserted without modifying other lines):
+  call writefile(['first', 'second', 'third'], g:filename, 'S')
+  call ale#code_actions#ApplyChanges(g:filename, [[2, 1, 2, 1, "insert\n"]])
+
+  AssertEqual
+  \ ['first', 'insert', 'second', 'third', ''],
+  \ readfile(g:filename, 'b')
+
+Execute(Test that lines can be inserted):
+  call writefile(['first', 'second', 'third', 'fourth', 'fifth'], g:filename, 'S')
+  call ale#code_actions#ApplyChanges(g:filename, [[2, 3, 4, 5, "xxx\nyyy"]])
+
+  AssertEqual
+  \ ['first', 'sexxx', 'yyyth', 'fifth', ''],
+  \ readfile(g:filename, 'b')
+
+Execute(Test edits where the start and end lines are the same):
+  call writefile(['first', 'second', 'third', 'fourth', 'fifth'], g:filename, 'S')
+  call ale#code_actions#ApplyChanges(g:filename, [[2, 3, 2, 4, "xxx\nyyy"]])
+
+  AssertEqual
+  \ ['first', 'sexxx', 'yyyond', 'third', 'fourth', 'fifth', ''],
+  \ readfile(g:filename, 'b')
+
+Execute(Single line in-line edits should work):
+  call writefile(['first', 'second', 'third', 'fourth', 'fifth'], g:filename, 'S')
+  call ale#code_actions#ApplyChanges(g:filename, [[2, 3, 2, 3, 'xxx']])
+
+  AssertEqual
+  \ ['first', 'sexxxcond', 'third', 'fourth', 'fifth', ''],
+  \ readfile(g:filename, 'b')
+
+Execute(Multiple edits for a single file should be applied correctly):
+  call writefile(['first', 'second', 'third', 'fourth', 'fifth'], g:filename, 'S')
+  call ale#code_actions#ApplyChanges(g:filename, [
+  \ [2, 3, 3, 5, "xxx\nyyy"],
+  \ [4, 2, 4, 4, "aaa\nbbb"],
+  \])
+
+  AssertEqual
+  \ ['first', 'sexxx', 'yyyd', 'fourth', 'faaa', 'bbbth', ''],
+  \ readfile(g:filename, 'b')
+
+Execute(Multiple edits for a single line should be applied correctly):
+  call writefile(['first', 'const x = abc + abc', 'third'], g:filename, 'S')
+  call ale#code_actions#ApplyChanges(g:filename, [
+  \ [2, 11, 2, 14, 'foobar'],
+  \ [2, 17, 2, 20, 'foobar'],
+  \])
+
+  AssertEqual
+  \ ['first', 'const x = foobar + foobar', 'third', ''],
+  \ readfile(g:filename, 'b')
+  \
+  call writefile(['first', 'const x = abc + abc', 'third'], g:filename, 'S')
+  call ale#code_actions#ApplyChanges(g:filename, [
+  \ [2, 11, 2, 14, 'y'],
+  \ [2, 17, 2, 20, 'y'],
+  \])
+
+  AssertEqual
+  \ ['first', 'const x = y + y', 'third', ''],
+  \ readfile(g:filename, 'b')
+
+Execute(Windows newlines when the filetype is unknown should be preserved):
+  call writefile(["first\r", "second\r", "third\r", "fourth\r", "fifth\r", ''], g:filename, 'Sb')
+  call ale#code_actions#ApplyChanges(g:filename, [[2, 3, 4, 5, "xxx\r\nyyy"]])
+
+  AssertEqual
+  \ ["first\r", "sexxx\r", "yyyth\r", "fifth\r", ''],
+  \ readfile(g:filename, 'b')
+
+Execute(Edits with Windows newlines should work):
+  call writefile(["first\r", "second\r", "third\r", "fourth\r", "fifth\r", ''], g:filename, 'Sb')
+  execute 'noautocmd :e! ++ff=dos ' . fnameescape(g:filename)
+  call ale#code_actions#ApplyChanges(g:filename, [[2, 3, 4, 5, "xxx\nyyy"]])
+
+  AssertEqual
+  \ ["first\r", "sexxx\r", "yyyth\r", "fifth\r", ''],
+  \ readfile(g:filename, 'b')

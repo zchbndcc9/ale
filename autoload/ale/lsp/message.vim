@@ -163,3 +163,17 @@ function! ale#lsp#message#DidChangeConfiguration(buffer, config) abort
     \   'settings': a:config,
     \}]
 endfunction
+
+function! ale#lsp#message#CodeAction(buffer, line, column, end_line, end_column) abort
+    return [0, 'textDocument/codeAction', {
+    \   'textDocument': {
+    \       'uri': ale#path#ToURI(expand('#' . a:buffer . ':p')),
+    \   },
+    \   'range': {
+    \       'start': {'line': a:line, 'character': a:column},
+    \       'end': {'line': a:end_line, 'character': a:end_column},
+    \   },
+    \   'context': {
+    \   },
+    \}]
+endfunction
