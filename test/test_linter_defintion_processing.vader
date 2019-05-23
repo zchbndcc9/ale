@@ -1,8 +1,10 @@
 Before:
   Save g:ale_lsp_root
   Save b:ale_lsp_root
+  Save g:ale_ignore_2_4_warnings
 
   let g:ale_lsp_root = {}
+  let g:ale_ignore_2_4_warnings = 1
   unlet! b:ale_lsp_root
 
   let g:linter = {}
@@ -345,6 +347,28 @@ Execute(PreProcess should set a default value for lint_file):
   \}
 
   AssertEqual 0, ale#linter#PreProcess('testft', g:linter).lint_file
+
+Execute(PreProcess should accept cwd strings):
+  let g:linter = ale#linter#PreProcess('testft', {
+  \ 'name': 'foo',
+  \ 'callback': 'SomeFunction',
+  \ 'executable': function('type'),
+  \ 'command': 'echo',
+  \ 'cwd': '/foo/bar',
+  \})
+
+  AssertEqual '/foo/bar', g:linter.cwd
+
+Execute(PreProcess should accept cwd functions):
+  let g:linter = ale#linter#PreProcess('testft', {
+  \ 'name': 'foo',
+  \ 'callback': 'SomeFunction',
+  \ 'executable': function('type'),
+  \ 'command': 'echo',
+  \ 'cwd': {b -> '/foo/bar'},
+  \})
+
+  AssertEqual '/foo/bar', g:linter.cwd(0)
 
 Execute(PreProcess should set a default value for aliases):
   let g:linter = {
@@ -745,3 +769,29 @@ Execute(PreProcess should throw when lsp_config is not a Dictionary or Function)
   \ 'lsp_config': 'x',
   \})
   AssertEqual '`lsp_config` must be a Dictionary or Function if defined', g:vader_exception
+
+Execute(PreProcess should not allow commands to be set when lsp == 'socket'):
+  let g:linter = {
+  \ 'name': 'x',
+  \ 'lsp': 'socket',
+  \ 'address_callback': 'X',
+  \ 'language': 'foo',
+  \ 'project_root_callback': 'x',
+  \ 'command': 'foo',
+  \}
+
+  AssertThrows call ale#linter#PreProcess('testft', g:linter)
+  AssertEqual '`command` and `command_callback` and `command_chain` cannot be used when lsp == ''socket''', g:vader_exception
+
+Execute(PreProcess should not allow cwd to be set when lsp == 'socket'):
+  let g:linter = {
+  \ 'name': 'x',
+  \ 'lsp': 'socket',
+  \ 'address_callback': 'X',
+  \ 'language': 'foo',
+  \ 'project_root_callback': 'x',
+  \ 'cwd': '/foo/bar',
+  \}
+
+  AssertThrows call ale#linter#PreProcess('testft', g:linter)
+  AssertEqual '`cwd` cannot be used when lsp == ''socket''', g:vader_exception

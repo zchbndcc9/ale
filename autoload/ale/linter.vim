@@ -133,6 +133,10 @@ function! ale#linter#PreProcess(filetype, linter) abort
         \|| has_key(a:linter, 'command_chain')
             throw '`command` and `command_callback` and `command_chain` cannot be used when lsp == ''socket'''
         endif
+
+        if has_key(a:linter, 'cwd')
+            throw '`cwd` cannot be used when lsp == ''socket'''
+        endif
     elseif has_key(a:linter, 'command_chain')
         let l:obj.command_chain = a:linter.command_chain
 
@@ -338,6 +342,13 @@ function! ale#linter#PreProcess(filetype, linter) abort
     if type(l:obj.aliases) isnot v:t_list
     \|| len(filter(copy(l:obj.aliases), 'type(v:val) isnot v:t_string')) > 0
         throw '`aliases` must be a List of String values'
+    endif
+
+    let l:obj.cwd = get(a:linter, 'cwd', '')
+
+    if type(l:obj.cwd) isnot v:t_string
+    \&& type(l:obj.cwd) isnot v:t_func
+        throw '`cwd` must be a String or Funcref'
     endif
 
     for l:key in filter(keys(a:linter), 'v:val[-9:] is# ''_callback'' || v:val is# ''command_chain''')

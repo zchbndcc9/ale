@@ -393,7 +393,7 @@ endfunction
 "
 " 1 will be returned if the program is running, or 0 if the program could
 " not be started.
-function! ale#lsp#StartProgram(conn_id, executable, command) abort
+function! ale#lsp#StartProgram(conn_id, executable, command, cwd) abort
     let l:conn = s:connections[a:conn_id]
     let l:started = 0
 
@@ -401,6 +401,7 @@ function! ale#lsp#StartProgram(conn_id, executable, command) abort
         let l:options = {
         \   'mode': 'raw',
         \   'out_cb': {_, message -> ale#lsp#HandleMessage(a:conn_id, message)},
+        \   'cwd': a:cwd,
         \}
 
         if has('win32')

@@ -271,7 +271,7 @@ Before:
     \       'connection_id': a:conn_prefix . ':' . a:root,
     \       'project_root': a:root,
     \       'buffer': bufnr(''),
-    \       'command': !empty(a:command) ? ale#job#PrepareCommand(bufnr(''), a:command) : '',
+    \       'command': !empty(a:command) ? ale#job#PrepareCommand(bufnr(''), a:command, '') : '',
     \     },
     \   ],
     \ ],

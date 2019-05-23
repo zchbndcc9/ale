@@ -16,15 +16,15 @@ Execute(sh should be used when the shell is fish):
     let &shellcmdflag = '-f'
     let &shell = 'fish'
 
-    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar')
+    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar', '')
 
     let &shell = '/usr/bin/fish'
 
-    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar')
+    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar', '')
 
     let &shell = '/usr/local/bin/fish'
 
-    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar')
+    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar', '')
   endif
 
 Execute(sh should be used when the shell is powershell):
@@ -33,15 +33,15 @@ Execute(sh should be used when the shell is powershell):
     let &shellcmdflag = '-f'
     let &shell = 'pwsh'
 
-    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar')
+    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar', '')
 
     let &shell = '/usr/bin/pwsh'
 
-    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar')
+    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar', '')
 
     let &shell = '/usr/local/bin/pwsh'
 
-    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar')
+    AssertEqual ['/bin/sh', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar', '')
   endif
 
 Execute(Other shells should be used when set):
@@ -50,7 +50,7 @@ Execute(Other shells should be used when set):
     let &shellcmdflag = '-c'
     let g:ale_shell = &shell
 
-    AssertEqual ['/bin/bash', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar')
+    AssertEqual ['/bin/bash', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), 'foobar', '')
   endif
 
 Execute(cmd /s/c as a string should be used on Windows):
@@ -58,18 +58,18 @@ Execute(cmd /s/c as a string should be used on Windows):
     let &shell = 'who cares'
     let &shellcmdflag = 'whatever'
 
-    AssertEqual 'cmd /s/c "foobar"', ale#job#PrepareCommand(bufnr(''), 'foobar')
+    AssertEqual 'cmd /s/c "foobar"', ale#job#PrepareCommand(bufnr(''), 'foobar', '')
   endif
 
 Execute(Setting ale_shell should cause ale#job#PrepareCommand to use set shell):
   let g:ale_shell = '/foo/bar'
 
   if has('win32')
-    AssertEqual ['/foo/bar', '/c', 'foobar'], ale#job#PrepareCommand(bufnr(''), "foobar")
+    AssertEqual ['/foo/bar', '/c', 'foobar'], ale#job#PrepareCommand(bufnr(''), "foobar", '')
   else
-    AssertEqual ['/foo/bar', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), "foobar")
+    AssertEqual ['/foo/bar', '-c', 'foobar'], ale#job#PrepareCommand(bufnr(''), "foobar", '')
   endif
 
   let g:ale_shell_arguments = '-x'
 
-  AssertEqual ['/foo/bar', '-x', 'foobar'], ale#job#PrepareCommand(bufnr(''), "foobar")
+  AssertEqual ['/foo/bar', '-x', 'foobar'], ale#job#PrepareCommand(bufnr(''), "foobar", '')

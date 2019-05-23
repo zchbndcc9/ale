@@ -8,7 +8,7 @@ Before:
     \ ? 'cmd /s/c "' . a:expected_part . '"'
     \ : split(&shell) + split(&shellcmdflag) + [a:expected_part]
 
-    AssertEqual l:expected, ale#job#PrepareCommand(bufnr(''), a:input)
+    AssertEqual l:expected, ale#job#PrepareCommand(bufnr(''), a:input, '')
   endfunction
 
 After:

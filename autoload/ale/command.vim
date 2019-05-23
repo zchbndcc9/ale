@@ -259,6 +259,7 @@ function! ale#command#Run(buffer, command, Callback, ...) abort
     let l:output_stream = get(l:options, 'output_stream', 'stdout')
     let l:line_list = []
 
+    let l:cwd = get(l:options, 'cwd', '')
     let [l:temporary_file, l:command, l:file_created] = ale#command#FormatCommand(
     \   a:buffer,
     \   get(l:options, 'executable', ''),
@@ -266,7 +267,7 @@ function! ale#command#Run(buffer, command, Callback, ...) abort
     \   get(l:options, 'read_buffer', 0),
     \   get(l:options, 'input', v:null),
     \)
-    let l:command = ale#job#PrepareCommand(a:buffer, l:command)
+    let l:command = ale#job#PrepareCommand(a:buffer, l:command, l:cwd)
     let l:job_options = {
     \   'exit_cb': {job_id, exit_code -> s:ExitCallback(
     \       a:buffer,
@@ -281,6 +282,7 @@ function! ale#command#Run(buffer, command, Callback, ...) abort
     \       }
     \   )},
     \   'mode': 'nl',
+    \   'cwd': l:cwd,
     \}
 
     if l:output_stream is# 'stdout'

@@ -172,7 +172,19 @@ function! s:PrepareWrappedCommand(original_wrapper, command) abort
     return l:prefix . l:wrapped
 endfunction
 
-function! ale#job#PrepareCommand(buffer, command) abort
+function! ale#job#PrepareCommand(buffer, command, cwd) abort
+    let l:command = a:command
+
+    " If we're on a version of Vim that doesn't support the cwd option for
+    " jobs, prefix the command with a `cd` command.
+    if !empty(a:cwd) && !has('nvim') && !has('patch-8.0.0902')
+        if has('win32')
+            let l:command = 'cd /d ' . ale#Escape(a:cwd) . ' && ' . l:command
+        else
+            let l:command = 'cd ' . ale#Escape(a:cwd) . ' && ' . l:command
+        endif
+    endif
+
     let l:wrapper = ale#Var(a:buffer, 'command_wrapper')
 
     " The command will be executed in a subshell. This fixes a number of
@@ -183,7 +195,7 @@ function! ale#job#PrepareCommand(buffer, command) abort
     " but we'll do this explicitly, so we use the same exact command for both
     " versions.
     let l:command = !empty(l:wrapper)
-    \ ? s:PrepareWrappedCommand(l:wrapper, a:command)
+    \ ? s:PrepareWrappedCommand(l:wrapper, l:command)
     \ : a:command
 
     " If a custom shell is specified, use that.
@@ -212,11 +224,13 @@ endfunction
 " err_cb  - A callback for receiving stderr. Arguments: (job_id, data)
 " exit_cb - A callback for program exit.     Arguments: (job_id, status_code)
 " mode    - A mode for I/O. Can be 'nl' for split lines or 'raw'.
+" cwd     - Set the current working directory for a command.
 function! ale#job#Start(command, options) abort
     call ale#job#ValidateArguments(a:command, a:options)
 
     let l:job_info = copy(a:options)
     let l:job_options = {}
+    let l:cwd = get(a:options, 'cwd', '')
 
     if has('nvim')
         if has_key(a:options, 'out_cb')
@@ -231,6 +245,10 @@ function! ale#job#Start(command, options) abort
 
         if has_key(a:options, 'exit_cb')
             let l:job_options.on_exit = function('s:NeoVimCallback')
+        endif
+
+        if !empty(l:cwd)
+            let l:job_options.cwd = l:cwd
         endif
 
         let l:job_info.job = jobstart(a:command, l:job_options)
@@ -256,6 +274,12 @@ function! ale#job#Start(command, options) abort
             " earlier on.
             let l:job_options.close_cb = function('s:VimCloseCallback')
             let l:job_options.exit_cb = function('s:VimExitCallback')
+        endif
+
+        " Use the cwd options for setting the working directory if the Vim
+        " version is new enough.
+        if has('patch-8.0.0902') && !empty(l:cwd)
+            let l:job_options.cwd = l:cwd
         endif
 
         " Use non-blocking writes for Vim versions that support the option.

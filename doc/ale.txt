@@ -259,6 +259,8 @@ are supported for running the commands.
 
                       A |List| of |String|s must be returned.
 
+  `cwd`                 A working directory to use for the command.
+
   `read_buffer`         An optional key for disabling reading the buffer.
 
                       When set to `0`, ALE will not pipe the buffer's data
@@ -2756,6 +2758,8 @@ ale#command#Run(buffer, command, callback, [options])       *ale#command#Run()*
     `executable`    - An executable for formatting into `%e` in the command.
                     If this option is not provided, formatting commands with
                     `%e` will not work.
+
+    `cwd`           - A working directory to use for the command.
 
     `read_buffer`   - If set to `1`, the buffer will be piped into the
                     command.

@@ -23,16 +23,17 @@ Execute(Command formatting should be applied correctly for LSP linters):
   \   'lsp': 'stdio',
   \   'executable': has('win32') ? 'cmd': 'true',
   \   'command': '%e --foo',
+  \   'cwd': '',
   \ },
   \ {-> 0}
   \)
 
   if has('win32')
     AssertEqual
-    \ ['cmd', 'cmd /s/c "cmd --foo"'],
+    \ ['cmd', 'cmd /s/c "cmd --foo"', ''],
     \ g:args
   else
     AssertEqual
-    \ ['true', [&shell, '-c', '''true'' --foo']],
+    \ ['true', [&shell, '-c', '''true'' --foo'], ''],
     \ g:args
   endif

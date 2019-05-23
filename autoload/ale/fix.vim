@@ -216,6 +216,7 @@ function! s:RunJob(result, options) abort
     \   'read_buffer': l:read_buffer,
     \   'input': l:input,
     \   'log_output': 0,
+    \   'cwd': get(a:result, 'cwd', ''),
     \})
 
     if empty(l:run_result)

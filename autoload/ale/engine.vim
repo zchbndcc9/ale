@@ -458,6 +458,9 @@ function! s:RunJob(command, options) abort
     let l:read_buffer = a:options.read_buffer
     let l:info = g:ale_buffer_info[l:buffer]
 
+    let l:cwd = type(l:linter.cwd) is v:t_func
+    \   ? l:linter.cwd(l:buffer)
+    \   : l:linter.cwd
     let l:Callback = function('s:HandleExit', [{
     \   'linter': l:linter,
     \   'executable': l:executable,
@@ -468,6 +471,7 @@ function! s:RunJob(command, options) abort
     \   'executable': l:executable,
     \   'read_buffer': l:read_buffer,
     \   'log_output': l:next_chain_index >= len(get(l:linter, 'command_chain', [])),
+    \   'cwd': l:cwd,
     \})
 
     " Only proceed if the job is being run.
