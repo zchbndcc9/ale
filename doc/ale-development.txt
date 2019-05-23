@@ -306,6 +306,7 @@ given the above setup are as follows.
 `GivenCommandOutput [...]`         - Define output for ale#command#Run.
 `AssertLinter executable, command` - Check the executable and command.
 `AssertLinterNotExecuted`          - Check that linters will not be executed.
+`AssertWorkingDirectory cwd`       - Check the cwd the linter will use.
 `AssertLSPLanguage language`       - Check the language given to an LSP server.
 `AssertLSPOptions options_dict`    - Check the options given to an LSP server.
 `AssertLSPConfig config_dict`      - Check the config given to an LSP server.

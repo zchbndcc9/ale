@@ -151,6 +151,16 @@ function! ale#assert#LSPAddress(expected_address) abort
     AssertEqual a:expected_address, l:address
 endfunction
 
+function! ale#assert#WorkingDirectory(expected_cwd) abort
+    let l:buffer = bufnr('')
+    let l:linter = s:GetLinter()
+    let l:cwd = type(l:linter) is v:t_func
+    \   ? l:linter.cwd(l:buffer)
+    \   : l:linter.cwd
+
+    AssertEqual a:expected_cwd, l:cwd
+endfunction
+
 function! ale#assert#SetUpLinterTestCommands() abort
     command! -nargs=+ GivenCommandOutput :call ale#assert#GivenCommandOutput(<args>)
     command! -nargs=+ AssertLinter :call ale#assert#Linter(<args>)
@@ -160,6 +170,7 @@ function! ale#assert#SetUpLinterTestCommands() abort
     command! -nargs=+ AssertLSPLanguage :call ale#assert#LSPLanguage(<args>)
     command! -nargs=+ AssertLSPProject :call ale#assert#LSPProject(<args>)
     command! -nargs=+ AssertLSPAddress :call ale#assert#LSPAddress(<args>)
+    command! -nargs=+ AssertWorkingDirectory :call ale#assert#WorkingDirectory(<args>)
 endfunction
 
 function! ale#assert#SetUpFixerTestCommands() abort
@@ -252,6 +263,10 @@ function! ale#assert#TearDownLinterTest() abort
 
     if exists(':AssertLSPAddress')
         delcommand AssertLSPAddress
+    endif
+
+    if exists(':AssertWorkingDirectory')
+        delcommand AssertWorkingDirectory
     endif
 
     if exists('g:dir')

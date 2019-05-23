@@ -6,13 +6,14 @@ function! ale_linters#go#gotype#GetCommand(buffer) abort
         return ''
     endif
 
-    return ale#path#BufferCdString(a:buffer) . ' gotype -e .'
+    return 'gotype -e .'
 endfunction
 
 call ale#linter#Define('go', {
 \   'name': 'gotype',
 \   'output_stream': 'stderr',
 \   'executable': 'gotype',
+\   'cwd': function('ale#linter#GetBufferDirname'),
 \   'command': function('ale_linters#go#gotype#GetCommand'),
 \   'callback': 'ale#handlers#go#Handler',
 \   'lint_file': 1,
