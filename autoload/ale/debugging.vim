@@ -256,3 +256,28 @@ function! ale#debugging#InfoToFile(filename) abort
     call writefile(split(l:output, "\n"), l:expanded_filename)
     call s:Echo('ALEInfo written to ' . l:expanded_filename)
 endfunction
+
+function! ale#debugging#StartLogging(filename) abort
+    " Trim leading and trailing spaces.
+    let l:filename = substitute(a:filename, '\v^\s+|\s+$', '', 'g')
+
+    " Replace ~/ with the home directory.
+    " expand() does this, but does way too many other things too.
+    if l:filename[:1] is# '~/'
+        let l:filename = $HOME . l:filename[1:]
+    endif
+
+    if filewritable(ale#path#Dirname(l:filename)) isnot 2
+        throw 'Log file cannot be written to ' . l:filename
+    endif
+
+    let s:log_filename = l:filename
+endfunction
+
+function! ale#debugging#StopLogging() abort
+    if exists('s:log_filename')
+        call writefile([], s:log_filename, 'a')
+    endif
+
+    unlet! s:log_filename
+endfunction
